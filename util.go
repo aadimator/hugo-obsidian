@@ -38,7 +38,7 @@ func processSource(source string) string {
 }
 
 func isInternal(link string) bool {
-	return !strings.HasPrefix(link, "http")
+	return !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "file") && !strings.HasPrefix(link, "zotero")
 }
 
 // From https://golang.org/src/net/url/url.go
@@ -84,11 +84,27 @@ func UnicodeSanitize(s string) string {
 func filter(links []Link) (res []Link) {
 	for _, l := range links {
 		// filter external and non-md
-		isMarkdown := filepath.Ext(l.Target) == "" || filepath.Ext(l.Target) == ".md"
-		if isInternal(l.Target) && isMarkdown {
+		isMarkdown := (filepath.Ext(l.Target) == "" || filepath.Ext(l.Target) == ".md") && !strings.Contains(strings.ToLower(l.Target), "attachments")
+		if isInternal(l.Target) && isMarkdown && l.Target != "/" {
 			res = append(res, l)
 		}
 	}
 	fmt.Printf("Removed %d external and non-markdown links\n", len(links)-len(res))
 	return res
+}
+
+func transform_links(links []Link, i ContentIndex, mapping map[string]string) (res []Link, resContent ContentIndex) {
+	resContent = make(ContentIndex)
+	for _, l := range links {
+		l.Source = mapping[l.Source[strings.LastIndex(l.Source, "/")+1:]]
+
+		l.Target = mapping[l.Target[strings.LastIndex(l.Target, "/")+1:]]
+		res = append(res, l)
+	}
+
+	for key, value := range i {
+		resContent[mapping[key[strings.LastIndex(key, "/")+1:]]] = value
+	}
+
+	return res, resContent
 }

@@ -15,13 +15,15 @@ import (
 
 type Front struct {
 	Title string `yaml:"title"`
+	Url   string `yaml:"url"`
 	Draft bool   `yaml:"draft"`
 }
 
 // recursively walk directory and return all files with given extension
-func walk(root, ext string, index bool, ignorePaths map[string]struct{}) (res []Link, i ContentIndex) {
+func walk(root, ext string, index bool, ignorePaths map[string]struct{}) (res []Link, i ContentIndex, mapping map[string]string) {
 	fmt.Printf("Scraping %s\n", root)
 	i = make(ContentIndex)
+	mapping = make(map[string]string)
 
 	nPrivate := 0
 
@@ -67,10 +69,13 @@ func walk(root, ext string, index bool, ignorePaths map[string]struct{}) (res []
 						Content:      body,
 					}
 					res = append(res, parse(s, root)...)
+
+					mapping[source[strings.LastIndex(source, "/")+1:]] = "/" + matter.Url
 				} else {
 					fmt.Printf("[Ignored] %s\n", d.Name())
 					nPrivate++
 				}
+
 			}
 		}
 		return nil
@@ -84,7 +89,7 @@ func walk(root, ext string, index bool, ignorePaths map[string]struct{}) (res []
 	fmt.Printf("[DONE] in %s\n", end.Sub(start).Round(time.Millisecond))
 	fmt.Printf("Ignored %d private files \n", nPrivate)
 	fmt.Printf("Parsed %d total links \n", len(res))
-	return res, i
+	return res, i, mapping
 }
 
 func getText(dir string) string {
