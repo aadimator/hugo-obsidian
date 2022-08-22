@@ -42,7 +42,7 @@ func processSource(source string) string {
 }
 
 func isInternal(link string) bool {
-	return !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "file") && !strings.HasPrefix(link, "zotero")
+	return !strings.HasPrefix(link, "http") && !strings.HasPrefix(link, "file") && !strings.HasPrefix(link, "zotero") && !strings.HasPrefix(link, "mailto")
 }
 
 // From https://golang.org/src/net/url/url.go
