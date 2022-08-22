@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -47,7 +47,7 @@ type ConfigTOML struct {
 func getIgnoredFiles(base string) (res map[string]struct{}) {
 	res = make(map[string]struct{})
 
-	source, err := ioutil.ReadFile(filepath.FromSlash(base + "/config.toml"))
+	source, err := os.ReadFile(filepath.FromSlash(base + "/config.toml"))
 	if err != nil {
 		return res
 	}
@@ -72,10 +72,12 @@ func main() {
 	out := flag.String("output", ".", "Output Directory")
 	root := flag.String("root", "..", "Root Directory (for config parsing)")
 	index := flag.Bool("index", false, "Whether to index the content")
+	strip := flag.Bool("strip", true, "Whether to strip comments")
 	flag.Parse()
 
+	process_index(*in, "notes")
 	ignoreBlobs := getIgnoredFiles(*root)
-	l, i, mapping := walk(*in, ".md", *index, ignoreBlobs)
+	l, i, mapping := walk(*in, ".md", *index, ignoreBlobs, *strip)
 	f := filter(l)
 	tl, ti := transform_links(f, i, mapping)
 	err := write(tl, ti, *index, *out, *root)

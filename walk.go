@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -20,7 +20,7 @@ type Front struct {
 }
 
 // recursively walk directory and return all files with given extension
-func walk(root, ext string, index bool, ignorePaths map[string]struct{}) (res []Link, i ContentIndex, mapping map[string]string) {
+func walk(root, ext string, index bool, ignorePaths map[string]struct{}, strip bool) (res []Link, i ContentIndex, mapping map[string]string) {
 	fmt.Printf("Scraping %s\n", root)
 	i = make(ContentIndex)
 	mapping = make(map[string]string)
@@ -46,6 +46,16 @@ func walk(root, ext string, index bool, ignorePaths map[string]struct{}) (res []
 		} else if filepath.Ext(d.Name()) == ext {
 			if index {
 				text := getText(s)
+
+				if strip {
+					re := regexp.MustCompile(`\s*\%\%(.|\n)*?\s*\%\%`)
+					text = re.ReplaceAllString(text, ``)
+
+					writeErr := os.WriteFile(s, []byte(text), 0666)
+					if writeErr != nil {
+						return writeErr
+					}
+				}
 
 				var matter Front
 				raw_body, err := frontmatter.Parse(strings.NewReader(text), &matter, formats...)
@@ -94,7 +104,7 @@ func walk(root, ext string, index bool, ignorePaths map[string]struct{}) (res []
 
 func getText(dir string) string {
 	// read file
-	fileBytes, err := ioutil.ReadFile(dir)
+	fileBytes, err := os.ReadFile(dir)
 	if err != nil {
 		panic(err)
 	}

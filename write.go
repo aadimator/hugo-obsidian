@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"path"
 )
@@ -22,7 +21,7 @@ func write(links []Link, contentIndex ContentIndex, toIndex bool, out string, ro
 		return mErr
 	}
 
-	writeErr := ioutil.WriteFile(path.Join(out, "linkIndex.json"), marshalledIndex, 0644)
+	writeErr := os.WriteFile(path.Join(out, "linkIndex.json"), marshalledIndex, 0644)
 	if writeErr != nil {
 		return writeErr
 	}
@@ -34,7 +33,7 @@ func write(links []Link, contentIndex ContentIndex, toIndex bool, out string, ro
 			return mcErr
 		}
 
-		writeErr = ioutil.WriteFile(path.Join(out, "contentIndex.json"), marshalledContentIndex, 0644)
+		writeErr = os.WriteFile(path.Join(out, "contentIndex.json"), marshalledContentIndex, 0644)
 		if writeErr != nil {
 			return writeErr
 		}

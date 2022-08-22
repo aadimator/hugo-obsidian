@@ -3,15 +3,16 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"io/ioutil"
+	"os"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 // parse single file for links
 func parse(dir, pathPrefix string) []Link {
 	// read file
-	source, err := ioutil.ReadFile(dir)
+	source, err := os.ReadFile(dir)
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +26,7 @@ func parse(dir, pathPrefix string) []Link {
 		panic(err)
 	}
 
-	doc, err := goquery.NewDocumentFromReader(&buf)
+	doc, _ := goquery.NewDocumentFromReader(&buf)
 	var n int
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
 		text := strings.TrimSpace(s.Text())

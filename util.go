@@ -3,9 +3,13 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"unicode"
+
+	"github.com/dlclark/regexp2"
 )
 
 func trim(source, prefix, suffix string) string {
@@ -107,4 +111,18 @@ func transform_links(links []Link, i ContentIndex, mapping map[string]string) (r
 	}
 
 	return res, resContent
+}
+
+func process_index(root, notes_dir string) error {
+	text := getText(path.Join(root, "_index.md"))
+
+	re := regexp2.MustCompile(`\[\[(?!(`+notes_dir+`))`, 0)
+	updated, _ := re.Replace(text, "[["+notes_dir+"/", -1, -1)
+
+	writeErr := os.WriteFile(path.Join(root, "_index.md"), []byte(updated), 0666)
+	if writeErr != nil {
+		return writeErr
+	}
+
+	return nil
 }
