@@ -73,9 +73,10 @@ func main() {
 	root := flag.String("root", "..", "Root Directory (for config parsing)")
 	index := flag.Bool("index", false, "Whether to index the content")
 	strip := flag.Bool("strip", true, "Whether to strip comments")
+	notes := flag.String("notes", "notes", "folder containing the notes inside `content`")
 	flag.Parse()
 
-	process_index(*in, "notes")
+	process_index(*in, *notes)
 	ignoreBlobs := getIgnoredFiles(*root)
 	l, i, mapping := walk(*in, ".md", *index, ignoreBlobs, *strip)
 	f := filter(l)
