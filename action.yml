@@ -1,4 +1,4 @@
-name: hugo-obsidian
+name: aadimator-hugo-obsidian
 inputs:
   input:
     default: .
