@@ -103,7 +103,10 @@ func transform_links(links []Link, i ContentIndex, mapping map[string]string) (r
 		l.Source = mapping[l.Source[strings.LastIndex(l.Source, "/")+1:]]
 
 		l.Target = mapping[l.Target[strings.LastIndex(l.Target, "/")+1:]]
-		res = append(res, l)
+
+		if l.Target != "" {
+			res = append(res, l)
+		}
 	}
 
 	for key, value := range i {
