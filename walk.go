@@ -17,6 +17,7 @@ type Front struct {
 	Title string `yaml:"title"`
 	Url   string `yaml:"url"`
 	Draft bool   `yaml:"draft"`
+	Tags  []string `yaml:"tags"`
 }
 
 // recursively walk directory and return all files with given extension
@@ -64,6 +65,7 @@ func walk(root, ext string, index bool, ignorePaths map[string]struct{}, strip b
 					matter = Front{
 						Title: "Untitled Page",
 						Draft: false,
+						Tags:  []string{},
 					}
 					body = text
 				}
@@ -72,11 +74,24 @@ func walk(root, ext string, index bool, ignorePaths map[string]struct{}, strip b
 					info, _ := os.Stat(s)
 					source := processSource(trim(s, root, ".md"))
 
+					// default title
+					title := matter.Title
+					if title == "" {
+						fileName := d.Name()
+						title = strings.TrimSuffix(filepath.Base(fileName), filepath.Ext(fileName))
+					}
+
+          // default tags
+          if matter.Tags == nil {
+            matter.Tags = []string{}
+          }
+
 					// add to content and link index
 					i[source] = Content{
 						LastModified: info.ModTime(),
-						Title:        matter.Title,
+						Title:        title,
 						Content:      body,
+						Tags:         matter.Tags,
 					}
 					res = append(res, parse(s, root)...)
 
